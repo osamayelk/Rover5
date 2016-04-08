@@ -7,7 +7,7 @@ QueueList <String> distanceQueue;
 QueueList <String> angleQueue;
 
 boolean debug = false;
-boolean matlab = true;
+boolean matlab = false;
 
 int x = 0;
 int i;
@@ -118,8 +118,8 @@ void brake() {
 }
 
 void rightMotorToggle() {
-  if (forwardR) rightMotorReverse();
-  else rightMotorForward();
+  if (forwardR) { rightMotorReverse(); forwardR = false;}
+  else { rightMotorForward(); forwardR = true;}
 }
 
 
@@ -163,7 +163,8 @@ double displacementT () { return (displacementR() + displacementL()) / 2 ; }
 //double relativeAngle () { return (displacementL() - displacementR()) / baseLine ; }
 double relativeAngleR() { return ((displacementR()/(2*baseLine))*180/PI); }
 double relativeAngleL() { return ((displacementL()/(2*baseLine))*180/PI); }
-double relativeAngleT() { return ((abs(relativeAngleR()) + abs(relativeAngleL())) / 2) ; }
+//double relativeAngleT() { return ((abs(relativeAngleR()) + abs(relativeAngleL())) / 2) ; }
+double relativeAngleT() { return ((relativeAngleR() - relativeAngleL()) / 2) ; }
 
 double ds0 = 0;
 double ds;
@@ -222,8 +223,8 @@ long t2 = millis();
 
 boolean fixAngle() {
   double err = compassReading - refReading;
-  if (err > 180) err = err - 360;
-  else if (err < -180) err = err + 360;
+//  if (err > 180) err = err - 360;
+//  else if (err < -180) err = err + 360;
   if (matlab) {
   currentTime = millis() - refTime;
   Serial.print("1:");
@@ -253,18 +254,22 @@ boolean fixAngle() {
     } else {
       newAngle = false;
       resetTicksT();
+      if (refDistance != 0) {
       newDistance = true;
+      }
       brake();
       return true;
     }
-    if (abs(err) <= 0.1) {
+    if (abs(err) <= 0.12) {
     count2 = count2 + 1;
     if (count2 == 30) {
       count2 = 0;
       resetTicksT();
       brake();
-      newAngle = false;
+      if (refDistance != 0) {
       newDistance = true;
+      }
+      newAngle = false;
       refTime = millis();
       return true;
     }
@@ -305,13 +310,14 @@ boolean fixDistance() {
     brake();
     newDistance = false;
   }
-  if (abs(errDist) <= 0.04 && millis() - t1 > 13) {
+  if (abs(errDist) <= 0.04){// && millis() - t1 > 13) {
     count = count + 1;
     t1 = millis();
     if (count == 10) {
       count = 0;
       brake();
       newDistance = false;
+      newAngle = false;
       resetTicksT();
     }
   } else {
@@ -321,10 +327,11 @@ boolean fixDistance() {
 }
 
 void messageParser(){
-
+  while (Serial.available()) {
   if(Serial.available()){
-    angleQueue.push(Serial.readStringUntil(' '));
-    distanceQueue.push(Serial.readStringUntil(' '));
+    angleQueue.push(Serial.readStringUntil(','));
+    distanceQueue.push(Serial.readStringUntil(':'));
+  }
   }
 }
 
@@ -369,7 +376,16 @@ void loop() {
     Serial.print(refReading);
     Serial.print(" and ");
     Serial.println(refDistance);
+    if (refReading != 0) {
     newAngle = true;
+    newDistance = false;
+    } else if (refDistance != 0) {
+      newAngle = false;
+      newDistance = true;
+    } else {
+      newAngle = false;
+      newDistance = false;
+    }
     resetTicksT();
     refTime = millis();
   }
