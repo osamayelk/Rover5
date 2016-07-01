@@ -6,7 +6,7 @@
 QueueList <String> distanceQueue;
 QueueList <String> angleQueue;
 
-boolean debug = false;
+boolean debug = true;
 boolean matlab = false;
 
 int x = 0;
@@ -164,7 +164,7 @@ double displacementT () { return (displacementR() + displacementL()) / 2 ; }
 double relativeAngleR() { return ((displacementR()/(2*baseLine))*180/PI); }
 double relativeAngleL() { return ((displacementL()/(2*baseLine))*180/PI); }
 //double relativeAngleT() { return ((abs(relativeAngleR()) + abs(relativeAngleL())) / 2) ; }
-double relativeAngleT() { return ((relativeAngleR() - relativeAngleL()) / 2) ; }
+double relativeAngleT() { return ((relativeAngleL() - relativeAngleR()) / 2) ; }
 
 double ds0 = 0;
 double ds;
@@ -239,16 +239,16 @@ boolean fixAngle() {
      if (Output > 0) { //&& !(err < 2 && err > -2)) {
       rightMotor = (int)Output;
       leftMotor = (int)Output;
-      rightMotorForward();
-      leftMotorReverse();
+      rightMotorReverse();
+      leftMotorForward();
       rightMotorSpeed(rightMotor);
       leftMotorSpeed(leftMotor);
     } else if (Output < 0) { //&& !(err < 2 && err > -2)) {
       //Output = Output - 35;
       rightMotor = -(int)Output;
       leftMotor = -(int)Output;
-      rightMotorReverse();
-      leftMotorForward();
+      rightMotorForward();
+      leftMotorReverse();
       rightMotorSpeed(rightMotor);
       leftMotorSpeed(leftMotor);
     } else {
