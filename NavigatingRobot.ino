@@ -8,8 +8,9 @@ QueueList <String> angleQueue;
 
 boolean debug = true;
 boolean matlab = false;
-
-int x = 0;
+float x=0;
+float y =0;
+float theta = 0;
 int i;
 const int pwmLeft = 5;     // CH3
 const int pwmLeft2 = 11;   // CH1
@@ -155,21 +156,21 @@ float cpr = 1000 / 3;
 const double calibrationR = 0.05654866776; //(PI * diameter) / cpr;
 const double calibrationL = 0.05654866776; //(PI * diameter) / cpr; // in case we wanted to calibrate each motor separatly but right now its irrelevant
 //float baseLine = 16.8;
-float baseLine = 9.45;
+float baseLine = 37.8;
 
 double displacementR () {  return calibrationR * (ticksR / 2) ; }
 double displacementL () { return calibrationL * (ticksL / 2) ; }
 double displacementT () { return (displacementR() + displacementL()) / 2 ; }
 //double relativeAngle () { return (displacementL() - displacementR()) / baseLine ; }
-double relativeAngleR() { return ((displacementR()/(2*baseLine))*180/PI); }
-double relativeAngleL() { return ((displacementL()/(2*baseLine))*180/PI); }
+double relativeAngleR() { return ((displacementR()/(baseLine))*180/PI); }
+double relativeAngleL() { return ((displacementL()/(baseLine))*180/PI); }
 //double relativeAngleT() { return ((abs(relativeAngleR()) + abs(relativeAngleL())) / 2) ; }
-double relativeAngleT() { return ((relativeAngleL() - relativeAngleR()) / 2) ; }
-
-double ds0 = 0;
-double ds;
-double dtheta0 = 0;
-double dtheta;
+double relativeAngleT() { return ((relativeAngleR() - relativeAngleL())) ; }
+void updateXY() {
+  theta = theta + relativeAngleT();
+  x = x + (displacementT()*cos(relativeAngleT()*(PI/180)));
+  y = y + (displacementT()*sin(relativeAngleT()*(PI/180)));
+}
 
 void resetTicksR() {
   ticksR = 0;
@@ -239,16 +240,16 @@ boolean fixAngle() {
      if (Output > 0) { //&& !(err < 2 && err > -2)) {
       rightMotor = (int)Output;
       leftMotor = (int)Output;
-      rightMotorReverse();
-      leftMotorForward();
+      rightMotorForward();
+      leftMotorReverse();
       rightMotorSpeed(rightMotor);
       leftMotorSpeed(leftMotor);
     } else if (Output < 0) { //&& !(err < 2 && err > -2)) {
       //Output = Output - 35;
       rightMotor = -(int)Output;
       leftMotor = -(int)Output;
-      rightMotorForward();
-      leftMotorReverse();
+      rightMotorReverse();
+      leftMotorForward();
       rightMotorSpeed(rightMotor);
       leftMotorSpeed(leftMotor);
     } else {
