@@ -153,10 +153,12 @@ void isrL () {
 
 unsigned short diameter = 6;
 float cpr = 1000 / 3;
-const double calibrationR = 0.1106; //(PI * diameter) / cpr;
-const double calibrationL = 0.0025; //(PI * diameter) / cpr; // in case we wanted to calibrate each motor separatly but right now its irrelevant
+double diameterR = 10.3306;
+double diameterL = 1.6694;
+const double calibrationR = 0.0974; //(PI * diameter) / cpr;
+const double calibrationL = 0.0157; //(PI * diameter) / cpr; // in case we wanted to calibrate each motor separatly but right now its irrelevant
 //float baseLine = 16.8;
-float baseLine = 37.0222;
+float baseLine = 36.6707;
 
 double displacementR () {  return calibrationR * (ticksR / 2) ; }
 double displacementL () { return calibrationL * (ticksL / 2) ; }
