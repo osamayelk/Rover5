@@ -1,13 +1,12 @@
 #include <PID_v1.h>
-#include <PidCompass.h>
 #include <QueueList.h>
 #include <EnableInterrupt.h>
 
 QueueList <String> distanceQueue;
 QueueList <String> angleQueue;
 
-boolean debug = true;
-boolean matlab = false;
+boolean debug = false;
+boolean matlab = true;
 float x=0;
 float y =0;
 float theta = 0;
@@ -40,18 +39,18 @@ double Output;
 int rightMotor;
 //left motor pwm referance value
 int leftMotor;
-double kp =  20;
-double ki = 40;
+double kp =  10;
+double ki = 25;
 double kd = 1.5;
 //Creats PID controller PID(&Input, &Output, &Setpoint, kp, ki, kd, Direction) where "input" is the output we are trying to control, "output" the variable that will be adjusted by pid
-PID_COMPASS myPID(&compassReading, &Output, &refReading, kp, ki, kd, DIRECT);
+PID myPID(&compassReading, &Output, &refReading, kp, ki, kd, DIRECT);
 
 
 //Encoders
 double refDistance = 0;
 double currentDistance = 0;
 double pidDistance;
-PID distPID(&currentDistance, &pidDistance, &refDistance, 80, 250, 1.5,DIRECT);
+PID distPID(&currentDistance, &pidDistance, &refDistance, 75, 100, 1.5,DIRECT);
 //kd = 1.5
 
 // Mapping Encoders interrupt pins to arduino analog pins.
@@ -263,7 +262,7 @@ boolean fixAngle() {
       brake();
       return true;
     }
-    if (abs(err) <= 0.12) {
+    if (abs(err) <= 0.33) {
     count2 = count2 + 1;
     if (count2 == 30) {
       count2 = 0;
@@ -313,7 +312,7 @@ boolean fixDistance() {
     brake();
     newDistance = false;
   }
-  if (abs(errDist) <= 0.04){// && millis() - t1 > 13) {
+  if (abs(errDist) <= 0.08){// && millis() - t1 > 13) {
     count = count + 1;
     t1 = millis();
     if (count == 10) {
@@ -375,10 +374,10 @@ void loop() {
     brake();
     refReading = angleQueue.pop().toInt();
     refDistance = distanceQueue.pop().toInt();
-    Serial.print("You sent ");
-    Serial.print(refReading);
-    Serial.print(" and ");
-    Serial.println(refDistance);
+    //Serial.print("You sent ");
+    //Serial.print(refReading);
+    //Serial.print(" and ");
+    //Serial.println(refDistance);
     if (refReading != 0) {
     newAngle = true;
     newDistance = false;
